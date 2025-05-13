@@ -5,12 +5,14 @@ import Login from "../pages/Login";
 import Dashboard from "../pages/Dashboard";
 import Settings from "../pages/Settings";
 import { useAuth } from "../context/AuthContext";
+import Booking from "../pages/Booking";
+import FullScreenLoader from "./Loader";
 
 const RoutesWrapper = () => {
   const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
-    return <div>Loading...</div>; // Or a spinner/loading component
+    return <div><FullScreenLoader /></div>;
   }
 
   return (
@@ -20,6 +22,10 @@ const RoutesWrapper = () => {
       <Route
         path="/dashboard"
         element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
+      />
+      <Route
+        path="/Booking"
+        element={isAuthenticated ? <Booking /> : <Navigate to="/login" />}
       />
       <Route
         path="/settings"

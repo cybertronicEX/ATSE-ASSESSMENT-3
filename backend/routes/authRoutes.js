@@ -3,28 +3,42 @@ const router = express.Router();
 const {
   signUpWithEmail,
   loginWithEmail,
-  signInWithGoogle,
 } = require('../controllers/authController');
 
 /**
  * @swagger
  * /api/auth/signup:
  *   post:
- *     summary: Sign up with email and password
+ *     summary: Sign up with email, password, name and role
  *     tags:
  *       - Auth
- *     parameters:
- *       - name: email
- *         in: body
- *         required: true
- *         type: string
- *       - name: password
- *         in: body
- *         required: true
- *         type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: user@example.com
+ *               password:
+ *                 type: string
+ *                 example: MySecurePassword123
+ *               username:
+ *                 type: string
+ *                 example: John Doe
+ *               role:
+ *                 type: string
+ *                 example: user
+ *             required:
+ *               - email
+ *               - password
+ *               - username
+ *               - role
  *     responses:
  *       201:
- *         description: User created
+ *         description: User created and token returned
  */
 router.post('/signup', signUpWithEmail);
 
@@ -70,22 +84,5 @@ router.post('/signup', signUpWithEmail);
 
 router.post('/login', loginWithEmail);
 
-/**
- * @swagger
- * /api/auth/google:
- *   post:
- *     summary: Sign in with Google ID token
- *     tags:
- *       - Auth
- *     parameters:
- *       - name: idToken
- *         in: body
- *         required: true
- *         type: string
- *     responses:
- *       200:
- *         description: Google sign-in successful
- */
-router.post('/google', signInWithGoogle);
 
 module.exports = router;
