@@ -7,9 +7,13 @@ import Settings from "../pages/Settings";
 import { useAuth } from "../context/AuthContext";
 import Booking from "../pages/Booking";
 import FullScreenLoader from "./Loader";
+import AvailableFlights from "../sections/Bookings/AvailableFlights";
+import PrivateLayout from "./PrivateRouteLayout";
+
 
 const RoutesWrapper = () => {
-  const { isAuthenticated, loading } = useAuth();
+
+  const { loading } = useAuth();
 
   if (loading) {
     return <div><FullScreenLoader /></div>;
@@ -19,18 +23,12 @@ const RoutesWrapper = () => {
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
-      <Route
-        path="/dashboard"
-        element={isAuthenticated ? <Dashboard /> : <Navigate to="/login" />}
-      />
-      <Route
-        path="/Booking"
-        element={isAuthenticated ? <Booking /> : <Navigate to="/login" />}
-      />
-      <Route
-        path="/settings"
-        element={isAuthenticated ? <Settings /> : <Navigate to="/login" />}
-      />
+      <Route element={<PrivateLayout />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/booking" element={<Booking />} />
+        <Route path="/available-flights" element={<AvailableFlights />} />
+        <Route path="/settings" element={<Settings />} />
+      </Route>
     </Routes>
   );
 };

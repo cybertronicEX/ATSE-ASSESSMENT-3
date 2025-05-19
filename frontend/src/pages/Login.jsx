@@ -18,7 +18,7 @@ function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
-  const [isSignUp, setIsSignUp] = useState(true);
+  const [isSignUp, setIsSignUp] = useState(false);
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
