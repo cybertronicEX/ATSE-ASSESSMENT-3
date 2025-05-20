@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { IoArrowBackCircleOutline } from "react-icons/io5";
 
 const cityOptions = [
   "Colombo",
@@ -26,6 +27,15 @@ const Booking = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-sky-50 px-4 py-10">
+      {/* Back button */}
+      <div className="w-full max-w-lg mb-4 lg:ml-[30%] ml-3 self-start">
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="text-sky-600 hover:text-sky-800 flex items-center gap-2"
+        >
+          <IoArrowBackCircleOutline className="text-5xl md:text-6xl" />
+        </button>
+      </div>
       <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-lg">
         <h2 className="text-2xl font-bold text-sky-600 mb-6">Book a Flight</h2>
         <div className="space-y-4">

@@ -1,7 +1,8 @@
 // AvailableFlights.jsx
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import SeatModal from "./SeatsModal"; // We'll define this next
+import { IoArrowBackCircleOutline } from "react-icons/io5";
 
 const mockFlights = Array.from({ length: 23 }, (_, i) => ({
     id: i + 1,
@@ -15,6 +16,7 @@ const mockFlights = Array.from({ length: 23 }, (_, i) => ({
 }));
 
 export default function AvailableFlights() {
+    const navigate = useNavigate();
     const { state } = useLocation();
     const [page, setPage] = useState(1);
     const [selectedFlight, setSelectedFlight] = useState(null);
@@ -26,8 +28,52 @@ export default function AvailableFlights() {
     const start = (page - 1) * flightsPerPage;
     const flightsToShow = filteredFlights.slice(start, start + flightsPerPage);
 
+
+    //dummy data
+    const seats = [
+        // Row 1 - Accessible
+        { row: 1, column: "A", type: "window", status: "available", zone: "accessible", assignedTo: null },
+        { row: 1, column: "B", type: "middle", status: "available", zone: "accessible", assignedTo: null },
+        { row: 1, column: "C", type: "middle", status: "broken", zone: "accessible", assignedTo: null },
+        { row: 1, column: "D", type: "window", status: "available", zone: "accessible", assignedTo: null },
+        { row: 1, column: "E", type: "window", status: "available", zone: "accessible", assignedTo: null },
+
+        // Row 2 - Standard
+        { row: 2, column: "A", type: "window", status: "booked", zone: "standard", assignedTo: "12345678" },
+        { row: 2, column: "B", type: "aisle", status: "available", zone: "standard", assignedTo: null },
+        { row: 2, column: "C", type: "aisle", status: "available", zone: "standard", assignedTo: null },
+        { row: 2, column: "D", type: "window", status: "booked", zone: "standard", assignedTo: "23456789" },
+
+        // Row 3 - Standard
+        { row: 3, column: "A", type: "window", status: "available", zone: "standard", assignedTo: null },
+        { row: 3, column: "B", type: "middle", status: "broken", zone: "standard", assignedTo: null },
+        { row: 3, column: "C", type: "middle", status: "available", zone: "standard", assignedTo: null },
+        { row: 3, column: "D", type: "window", status: "booked", zone: "standard", assignedTo: "34567890" },
+
+        // Row 4 - VIP
+        { row: 4, column: "A", type: "window", status: "available", zone: "VIP", assignedTo: null },
+        { row: 4, column: "B", type: "aisle", status: "booked", zone: "VIP", assignedTo: "45678901" },
+        { row: 4, column: "C", type: "aisle", status: "available", zone: "VIP", assignedTo: null },
+        { row: 4, column: "D", type: "window", status: "available", zone: "VIP", assignedTo: null },
+
+        // Row 5 - VIP
+        { row: 5, column: "A", type: "window", status: "reserved", zone: "VIP", assignedTo: null },
+        { row: 5, column: "B", type: "middle", status: "available", zone: "VIP", assignedTo: null },
+        { row: 5, column: "C", type: "middle", status: "broken", zone: "VIP", assignedTo: null },
+        { row: 5, column: "D", type: "window", status: "available", zone: "VIP", assignedTo: null },
+    ];
+
+
     return (
         <div className="min-h-screen bg-sky-50 px-4 py-10">
+            <div className="w-full max-w-lg mb-4 lg:ml-[10%] ml-3 self-start">
+                <button
+                    onClick={() => navigate("/booking")}
+                    className="text-sky-600 hover:text-sky-800 flex items-center gap-2"
+                >
+                    <IoArrowBackCircleOutline className="text-5xl md:text-6xl" />
+                </button>
+            </div>
             <div className="max-w-6xl mx-auto">
                 <h2 className="text-3xl font-bold text-sky-600 mb-6">
                     Flights to {state?.destination} on {state?.date}
@@ -69,10 +115,7 @@ export default function AvailableFlights() {
                     <SeatModal
                         flight={{ flight: "Emirates EK 74" }}
                         onClose={() => setModalOpen(false)}
-                        takenSeats={["2B", "3C", "5F", "7A", "8H"]}
-                        rows={12}
-                        leftColumns={["A", "B", "C"]}
-                        rightColumns={["D", "E", "F"]}
+                        seats={seats}
                     />
 
                 )}
