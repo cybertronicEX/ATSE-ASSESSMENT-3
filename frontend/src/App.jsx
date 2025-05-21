@@ -12,7 +12,7 @@ function App() {
         <div className="pt-16">
           <RoutesWrapper />
         </div>
-        <ToastContainer autoClose={1000} />
+        <ToastContainer autoClose={3000} />
         <Footer />
       </AuthProvider>
     </Router>

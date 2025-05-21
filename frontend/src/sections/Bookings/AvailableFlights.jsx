@@ -1,19 +1,11 @@
-// AvailableFlights.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import SeatModal from "./SeatsModal"; // We'll define this next
 import { IoArrowBackCircleOutline } from "react-icons/io5";
+import SeatModal from "./SeatsModal";
+import axiosInstance from "../../utils/axiosInstance";
+import { toast } from "react-toastify";
+import FullScreenLoader from "../../components/Loader";
 
-const mockFlights = Array.from({ length: 23 }, (_, i) => ({
-    id: i + 1,
-    flight: `Airline ${i + 1}`,
-    date: i % 2 === 0 ? "2025-05-19" : "2025-06-02",
-    price: (120 + i * 5).toFixed(2),
-    duration: `${1 + (i % 5)}h ${(i * 7) % 60}m`,
-    takenSeats: Array.from({ length: Math.floor(Math.random() * 30) }, () =>
-        `${String.fromCharCode(65 + Math.floor(Math.random() * 8))}${Math.floor(Math.random() * 10) + 1}`
-    )
-}));
 
 export default function AvailableFlights() {
     const navigate = useNavigate();
@@ -21,51 +13,84 @@ export default function AvailableFlights() {
     const [page, setPage] = useState(1);
     const [selectedFlight, setSelectedFlight] = useState(null);
     const [isModalOpen, setModalOpen] = useState(false);
+    const [seats, setSeats] = useState([]);
+    const flights = state?.flights || [];
+    const [loading, setLoading] = useState(false)
 
     const flightsPerPage = 10;
-    const filteredFlights = mockFlights.filter(f => f.date === state?.date);
-    const totalPages = Math.ceil(filteredFlights.length / flightsPerPage);
+    const totalPages = Math.ceil(flights.length / flightsPerPage);
     const start = (page - 1) * flightsPerPage;
-    const flightsToShow = filteredFlights.slice(start, start + flightsPerPage);
+    const flightsToShow = flights.slice(start, start + flightsPerPage);
+
+    const fetchSeats = async (flightId) => {
+        try {
+            setLoading(true);
+            const res = await axiosInstance.get(`/flights/${flightId}`);
+            if (res.data?.seats) {
+                setSeats(res.data.seats);
+            } else {
+                toast.error("No seat map found.");
+                setSeats([]);
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error("Error fetching seat map.");
+        }
+        finally {
+            setLoading(false);
+        }
+    };
+
+    const handleFlightClick = async (flight) => {
+        setSelectedFlight(flight);
+        await fetchSeats(flight.id);
+        setModalOpen(true);
+    };
+
+    // Booking Data 
+    const [passengerData, setPassengerData] = useState([
+        { name: "", passport: "", dob: "", zone: "" },
+    ]);
+    const [errors, setErrors] = useState([]);
+
+    const validate = () => {
+        const newErrors = passengerData.map((p) => ({
+            name: !p.name,
+            passport: !p.passport,
+            dob: !p.dob,
+            zone: !p.zone,
+        }));
+        setErrors(newErrors);
+        return !newErrors.some((e) => Object.values(e).some(Boolean));
+    };
+
+    const handleSubmit = async () => {
+        if (!validate()) return;
 
 
-    //dummy data
-    const seats = [
-        // Row 1 - Accessible
-        { row: 1, column: "A", type: "window", status: "available", zone: "accessible", assignedTo: null },
-        { row: 1, column: "B", type: "middle", status: "available", zone: "accessible", assignedTo: null },
-        { row: 1, column: "C", type: "middle", status: "broken", zone: "accessible", assignedTo: null },
-        { row: 1, column: "D", type: "window", status: "available", zone: "accessible", assignedTo: null },
-        { row: 1, column: "E", type: "window", status: "available", zone: "accessible", assignedTo: null },
+        try {
+            const response = await axiosInstance.post("/booking", {
+                flightId: selectedFlight.id,
+                passengers: passengerData,
+            });
+            toast.success("Booking Success:", response.data);
+            await fetchSeats(selectedFlight.id);
+            setPassengerData([
+                { name: "", passport: "", dob: "", zone: "" },
+            ])
+        } catch (err) {
+            console.error("Booking failed:", err);
+            const message = err.response?.data?.error || "Something went wrong. Please try again.";
+            toast.error(`Booking failed. ${message}`);
+        }
+    };
 
-        // Row 2 - Standard
-        { row: 2, column: "A", type: "window", status: "booked", zone: "standard", assignedTo: "12345678" },
-        { row: 2, column: "B", type: "aisle", status: "available", zone: "standard", assignedTo: null },
-        { row: 2, column: "C", type: "aisle", status: "available", zone: "standard", assignedTo: null },
-        { row: 2, column: "D", type: "window", status: "booked", zone: "standard", assignedTo: "23456789" },
 
-        // Row 3 - Standard
-        { row: 3, column: "A", type: "window", status: "available", zone: "standard", assignedTo: null },
-        { row: 3, column: "B", type: "middle", status: "broken", zone: "standard", assignedTo: null },
-        { row: 3, column: "C", type: "middle", status: "available", zone: "standard", assignedTo: null },
-        { row: 3, column: "D", type: "window", status: "booked", zone: "standard", assignedTo: "34567890" },
-
-        // Row 4 - VIP
-        { row: 4, column: "A", type: "window", status: "available", zone: "VIP", assignedTo: null },
-        { row: 4, column: "B", type: "aisle", status: "booked", zone: "VIP", assignedTo: "45678901" },
-        { row: 4, column: "C", type: "aisle", status: "available", zone: "VIP", assignedTo: null },
-        { row: 4, column: "D", type: "window", status: "available", zone: "VIP", assignedTo: null },
-
-        // Row 5 - VIP
-        { row: 5, column: "A", type: "window", status: "reserved", zone: "VIP", assignedTo: null },
-        { row: 5, column: "B", type: "middle", status: "available", zone: "VIP", assignedTo: null },
-        { row: 5, column: "C", type: "middle", status: "broken", zone: "VIP", assignedTo: null },
-        { row: 5, column: "D", type: "window", status: "available", zone: "VIP", assignedTo: null },
-    ];
-
+    if (loading) return <FullScreenLoader />
 
     return (
         <div className="min-h-screen bg-sky-50 px-4 py-10">
+            {/* Back Button */}
             <div className="w-full max-w-lg mb-4 lg:ml-[10%] ml-3 self-start">
                 <button
                     onClick={() => navigate("/booking")}
@@ -74,25 +99,31 @@ export default function AvailableFlights() {
                     <IoArrowBackCircleOutline className="text-5xl md:text-6xl" />
                 </button>
             </div>
+
+            {/* Title */}
             <div className="max-w-6xl mx-auto">
                 <h2 className="text-3xl font-bold text-sky-600 mb-6">
                     Flights to {state?.destination} on {state?.date}
                 </h2>
+
+                {/* Flight Cards */}
                 <div className="grid md:grid-cols-2 gap-6">
                     {flightsToShow.map((flight) => (
                         <button
                             key={flight.id}
-                            onClick={() => { setSelectedFlight(flight); setModalOpen(true); }}
+                            onClick={() => handleFlightClick(flight)}
                             className="bg-white p-6 rounded-xl shadow-md text-left hover:ring-2 hover:ring-sky-300"
                         >
-                            <h3 className="text-xl font-semibold text-sky-700">{flight.flight}</h3>
+                            <h3 className="text-xl font-semibold text-sky-700">{flight.planeName || flight.id}</h3>
                             <p className="text-gray-600 mt-1">Date: {flight.date}</p>
+                            <p className="text-gray-600">From: {flight.departure} → {flight.destination}</p>
                             <p className="text-gray-600">Duration: {flight.duration}</p>
                             <p className="text-lg font-bold text-green-600 mt-2">${flight.price}</p>
                         </button>
                     ))}
                 </div>
 
+                {/* Pagination */}
                 <div className="flex justify-center items-center mt-8 space-x-2">
                     <button
                         onClick={() => setPage((p) => Math.max(p - 1, 1))}
@@ -101,7 +132,9 @@ export default function AvailableFlights() {
                     >
                         Prev
                     </button>
-                    <span className="text-sm text-gray-700">Page {page} of {totalPages}</span>
+                    <span className="text-sm text-gray-700">
+                        Page {page} of {totalPages}
+                    </span>
                     <button
                         onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
                         disabled={page === totalPages}
@@ -111,18 +144,20 @@ export default function AvailableFlights() {
                     </button>
                 </div>
 
+                {/* Seat Modal */}
                 {selectedFlight && isModalOpen && (
                     <SeatModal
-                        flight={{ flight: "Emirates EK 74" }}
+                        flight={selectedFlight}
                         onClose={() => setModalOpen(false)}
                         seats={seats}
+                        passengerData={passengerData}
+                        setPassengerData={setPassengerData}
+                        handleSubmit={handleSubmit}
+                        errors={errors}
+                        setErrors={setErrors}
                     />
-
                 )}
             </div>
         </div>
     );
 }
-
-
-// add VIP sections child rows and special needs

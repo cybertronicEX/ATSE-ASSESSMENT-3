@@ -1,11 +1,8 @@
 import React, { useState } from "react";
 
-const BookingFormModal = ({ onClose }) => {
+const BookingFormModal = ({ onClose, passengerData, setPassengerData, handleSubmit, errors, setErrors, seats }) => {
   const [seatCount, setSeatCount] = useState(1);
-  const [passengerData, setPassengerData] = useState([
-    { name: "", passport: "", dob: "", zone: "" },
-  ]);
-  const [errors, setErrors] = useState([]);
+
 
   const handleSeatCountChange = (e) => {
     const count = Number(e.target.value);
@@ -22,23 +19,22 @@ const BookingFormModal = ({ onClose }) => {
     setPassengerData(updated);
   };
 
-  const validate = () => {
-    const newErrors = passengerData.map((p) => ({
-      name: !p.name,
-      passport: !p.passport,
-      dob: !p.dob,
-      zone: !p.zone,
-    }));
-    setErrors(newErrors);
-    return !newErrors.some((e) => Object.values(e).some(Boolean));
+
+  const handleSubmitFunctions = async () => {
+    await handleSubmit();
+    onClose();
+    setSeatCount(1);
+  }
+
+
+  // Check if all VIP or Accessible seats are booked
+  const isZoneFullyBooked = (zoneName) => {
+    const zoneSeats = seats.filter(seat => seat.zone.toLowerCase() === zoneName.toLowerCase());
+    return zoneSeats.length > 0 && zoneSeats.every(seat => seat.status !== "available");
   };
 
-  const handleSubmit = () => {
-    if (!validate()) return;
-    console.log("Booking confirmed:", passengerData);
-    // Proceed with API call or state update here
-    onClose();
-  };
+  const vipDisabled = isZoneFullyBooked("VIP");
+  const accessibleDisabled = isZoneFullyBooked("Accessible");
 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50">
@@ -104,10 +100,9 @@ const BookingFormModal = ({ onClose }) => {
                     value={passenger.zone}
                     onChange={(e) => handleInputChange(i, "zone", e.target.value)}
                   >
-                    <option value="">Select Zone</option>
-                    <option value="VIP">VIP</option>
                     <option value="standard">Standard</option>
-                    <option value="accessible">Accessible</option>
+                    <option value="VIP" disabled={vipDisabled}>VIP {vipDisabled ? "(Fully Booked)" : ""}</option>
+                    <option value="accessible" disabled={accessibleDisabled}>Accessible {accessibleDisabled ? "(Fully Booked)" : ""}</option>
                   </select>
                 </div>
               </div>
@@ -124,7 +119,7 @@ const BookingFormModal = ({ onClose }) => {
           </button>
           <button
             className="btn bg-sky-500 text-white border-none hover:bg-sky-600"
-            onClick={handleSubmit}
+            onClick={handleSubmitFunctions}
           >
             Confirm Booking
           </button>

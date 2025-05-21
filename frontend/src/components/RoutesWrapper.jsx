@@ -9,25 +9,38 @@ import Booking from "../pages/Booking";
 import FullScreenLoader from "./Loader";
 import AvailableFlights from "../sections/Bookings/AvailableFlights";
 import PrivateLayout from "./PrivateRouteLayout";
-
+import AdminDashboard from "../pages/Admin/Admin-Dashboard";
 
 const RoutesWrapper = () => {
 
-  const { loading } = useAuth();
+  const { loading, role } = useAuth();
 
   if (loading) {
     return <div><FullScreenLoader /></div>;
   }
+
+  console.log(role);
+  
 
   return (
     <Routes>
       <Route path="/" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route element={<PrivateLayout />}>
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/booking" element={<Booking />} />
-        <Route path="/available-flights" element={<AvailableFlights />} />
-        <Route path="/settings" element={<Settings />} />
+
+        {role === "admin" ? (
+          <>
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          </>
+        ) : (
+          <>
+            <Route path="/dashboard" element={<Dashboard />} />
+
+            <Route path="/booking" element={<Booking />} />
+            <Route path="/available-flights" element={<AvailableFlights />} />
+            <Route path="/settings" element={<Settings />} />
+          </>
+        )}
       </Route>
     </Routes>
   );

@@ -90,16 +90,24 @@ function Login() {
 
       const res = await axios.post(endpoint, payload);
       const auth = getAuth();
+      console.log(auth, 'auth');
 
       // Use the custom token returned by the backend to sign in
       await signInWithCustomToken(auth, res.data.token);
       const idToken = await auth.currentUser.getIdToken(true);
 
       // Store the token in your context/localStorage
-      login(idToken);
+      login(idToken, res.data.role); // ✅ Make sure `res.data.role` exists and is passed
+      const userRole = (res.data.role || "user").toLowerCase();
+
+      console.log(userRole);
 
       toast.success(`${isSignUp ? "Sign up" : "Login"} successful!`);
-      navigate("/dashboard");
+      if (userRole === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       console.error(err);
       if (err.code === "auth/wrong-password" || err.code === "auth/user-not-found") {

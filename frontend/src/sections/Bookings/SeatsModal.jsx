@@ -9,7 +9,7 @@ const getSeatColor = (seat) => {
     return "bg-green-100 text-gray-700";
 };
 
-const SeatModal = ({ flight, seats = [], onClose }) => {
+const SeatModal = ({ flight, seats = [], onClose, passengerData, setPassengerData, handleSubmit, errors, setErrors }) => {
     // Determine all columns and rows
     const allColumns = [...new Set(seats.map((s) => s.column))].sort();
     const maxRow = Math.max(...seats.map((s) => s.row));
@@ -128,7 +128,12 @@ const SeatModal = ({ flight, seats = [], onClose }) => {
                     </button>
                 </div>
             </div>
-            {showBookingForm && <BookingFormModal onClose={() => setShowBookingForm(false)} />}
+            {showBookingForm && <BookingFormModal onClose={() => setShowBookingForm(false)} passengerData={passengerData}
+                setPassengerData={setPassengerData}
+                handleSubmit={handleSubmit}
+                errors={errors}
+                setErrors={setErrors}
+                seats={seats} />}
         </div>
     );
 

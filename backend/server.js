@@ -5,9 +5,9 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerSpec = require('./swagger/swaggerConfig');
 
 const authRoutes = require('./routes/authRoutes');
-// const projectCharterRoutes = require('./routes/projectCharterRoutes');
-// const settingsRoutes = require("./routes/settingsRoutes");
-// const dashboardRoutes = require("./routes/dashboardRoutes");
+const flightRoutes = require('./routes/flightsRoutes');
+const planeRoutes = require('./routes/planeRoutes');
+const bookingRoutes = require('./routes/bookingRoutes')
 
 
 require('./config/firebase'); // Firebase config
@@ -18,13 +18,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+
 // Swagger docs
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use('/api/auth', authRoutes);
-// app.use("/api/project-charter", projectCharterRoutes);
-// app.use("/api/settings", settingsRoutes);
-// app.use("/api/dashboard", dashboardRoutes);
+app.use('/api/flights', flightRoutes);
+app.use('/api/planes', planeRoutes);
+app.use('/api/booking', bookingRoutes);
 
 
 const PORT = process.env.PORT || 5000;

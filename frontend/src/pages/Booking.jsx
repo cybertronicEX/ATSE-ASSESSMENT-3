@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoArrowBackCircleOutline } from "react-icons/io5";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import axiosInstance from "../utils/axiosInstance";
+import FullScreenLoader from "../components/Loader";
 
 const cityOptions = [
   "Colombo",
@@ -17,14 +21,40 @@ const Booking = () => {
   const [from, setFrom] = useState("");
   const [destination, setDestination] = useState("");
   const [date, setDate] = useState("");
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate();
 
-  const handleSearch = () => {
+  
+  const handleSearch = async () => {
     if (from && destination && date) {
-      navigate("/available-flights", { state: { from, destination, date } });
+      
+      try {
+        setLoading(true)
+        const res = await axiosInstance.get("/flights", {
+          params: { departure: from, destination, date },
+        });
+
+        const flights = res.data;
+
+        if (flights.length > 0) {
+          navigate("/available-flights", {
+            state: { from, destination, date, flights },
+          });
+        } else {
+          toast.error("No flights found for the selected criteria.");
+        }
+      } catch (err) {
+        console.error(err)
+        toast.error("An error occurred while fetching flights.");
+      } finally {
+        setLoading(false)
+      }
+    } else {
+      toast.warn("Please fill in all fields.");
     }
   };
 
+  if (loading) return <FullScreenLoader />
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-sky-50 px-4 py-10">
       {/* Back button */}

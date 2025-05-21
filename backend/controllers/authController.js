@@ -53,7 +53,15 @@ exports.loginWithEmail = async (req, res) => {
     // Generate a custom token using the user's uid
     const customToken = await admin.auth().createCustomToken(userRecord.uid);
 
-    res.status(200).json({ token: customToken });
+    const userSnap = await db.collection("users").doc(userRecord.uid).get();
+    if (!userSnap.exists) {
+      throw new Error("User record not found in Firestore");
+    }
+
+    const userData = userSnap.data();
+    const role = userData.role || "user"; // fallback to 'user' if role not defined
+
+    res.status(200).json({ token: customToken, role });
   } catch (error) {
     res.status(401).json({ error: error.message });
   }
