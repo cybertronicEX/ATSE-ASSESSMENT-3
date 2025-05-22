@@ -5,7 +5,8 @@ const {
     getFlights,
     updateFlight,
     deleteFlight,
-    getFlightById
+    getFlightById,
+    markBrokenSeats
 } = require("../controllers/flightsController");
 /**
  * @swagger
@@ -145,5 +146,57 @@ router.put("/:id", updateFlight);
  *         description: Flight deleted
  */
 router.delete("/:id", deleteFlight);
+
+
+/**
+ * @swagger
+ * /api/flights/{id}/breakSeats:
+ *   post:
+ *     summary: Randomly mark available seats as broken
+ *     tags: [Flights]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Flight ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - seatCount
+ *             properties:
+ *               seatCount:
+ *                 type: integer
+ *                 description: Number of seats to mark broken
+ *                 example: 3
+ *     responses:
+ *       200:
+ *         description: Seats marked as broken
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 brokenSeats:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       row:
+ *                         type: integer
+ *                       column:
+ *                         type: string
+ *       400:
+ *         description: Bad request (e.g., not enough available seats)
+ *       404:
+ *         description: Flight not found
+ */
+router.post("/:id/breakSeats", markBrokenSeats);
+
 
 module.exports = router;

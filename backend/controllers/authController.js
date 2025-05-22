@@ -61,7 +61,7 @@ exports.loginWithEmail = async (req, res) => {
     const userData = userSnap.data();
     const role = userData.role || "user"; // fallback to 'user' if role not defined
 
-    res.status(200).json({ token: customToken, role });
+    res.status(200).json({ token: customToken, role , userId: userRecord.uid, });
   } catch (error) {
     res.status(401).json({ error: error.message });
   }

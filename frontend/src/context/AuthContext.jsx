@@ -6,20 +6,27 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [role, setRole] = useState(null); // NEW
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const savedRole = localStorage.getItem("role"); // NEW
+    const savedRole = localStorage.getItem("role");
+    const savedUserId = localStorage.getItem("userId") // NEW
     setIsAuthenticated(!!token);
-    setRole(savedRole || null); // NEW
+    setRole(savedRole || null);
+    setUserId(savedUserId || null) // NEW
     setLoading(false);
   }, []);
 
-  const login = (token, userRole) => {
+  const login = (token, userRole, userId) => {
     localStorage.setItem("token", token);
     if (userRole) {
       localStorage.setItem("role", userRole); // NEW
       setRole(userRole); // NEW
+    }
+    if (userId) {
+      localStorage.setItem("userId", userId); // NEW
+      setUserId(userId);
     }
     setIsAuthenticated(true);
   };
@@ -29,6 +36,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("role"); // NEW
     setIsAuthenticated(false);
     setRole(null); // NEW
+    setUserId(null);
     window.location.href = "/login";
   };
 

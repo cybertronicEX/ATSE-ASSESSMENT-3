@@ -128,7 +128,7 @@ export default function AvailableFlights() {
                     <button
                         onClick={() => setPage((p) => Math.max(p - 1, 1))}
                         disabled={page === 1}
-                        className="btn btn-sm bg-sky-400 text-white hover:bg-sky-500"
+                        className="btn btn-sm bg-sky-400 text-sky-700 hover:bg-sky-500"
                     >
                         Prev
                     </button>
@@ -138,7 +138,7 @@ export default function AvailableFlights() {
                     <button
                         onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
                         disabled={page === totalPages}
-                        className="btn btn-sm bg-sky-400 text-white hover:bg-sky-500"
+                        className="btn btn-sm bg-sky-400 text-sky-700 hover:bg-sky-500"
                     >
                         Next
                     </button>

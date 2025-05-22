@@ -26,7 +26,7 @@ const Booking = () => {
 
   
   const handleSearch = async () => {
-    if (from && destination && date) {
+    if (from && destination) {
       
       try {
         setLoading(true)

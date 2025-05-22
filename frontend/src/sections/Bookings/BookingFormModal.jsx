@@ -1,40 +1,66 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { toast } from "react-toastify";
 
-const BookingFormModal = ({ onClose, passengerData, setPassengerData, handleSubmit, errors, setErrors, seats }) => {
+const BookingFormModal = ({
+  onClose,
+  passengerData,
+  setPassengerData,
+  handleSubmit,
+  seats
+}) => {
   const [seatCount, setSeatCount] = useState(1);
 
+  // Ensure new passenger entries default to standard zone
+  useEffect(() => {
+    setPassengerData(prev =>
+      Array.from({ length: seatCount }, (_, i) => ({
+        name: prev[i]?.name || "",
+        passport: prev[i]?.passport || "",
+        dob: prev[i]?.dob || "",
+        zone: prev[i]?.zone || "standard"
+      }))
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seatCount]);
 
-  const handleSeatCountChange = (e) => {
+  const handleSeatCountChange = e => {
     const count = Number(e.target.value);
     setSeatCount(count);
-    setPassengerData((prev) =>
-      Array.from({ length: count }, (_, i) => prev[i] || { name: "", passport: "", dob: "", zone: "" })
-    );
-    setErrors([]);
   };
 
   const handleInputChange = (i, field, value) => {
     const updated = [...passengerData];
-    updated[i][field] = value;
+    updated[i] = { ...updated[i], [field]: value };
     setPassengerData(updated);
   };
 
-
-  const handleSubmitFunctions = async () => {
+  const validateAndSubmit = async () => {
+    const missing = [];
+    passengerData.forEach((p, idx) => {
+      if (!p.name) missing.push(`Passenger ${idx + 1} name`);
+      if (!p.passport) missing.push(`Passenger ${idx + 1} passport`);
+      if (!p.dob) missing.push(`Passenger ${idx + 1} date of birth`);
+      if (!p.zone) missing.push(`Passenger ${idx + 1} zone`);
+    });
+    if (missing.length) {
+      missing.forEach(m => toast.error(`${m} is required`));
+      return; // keep modal open
+    }
+    // all good
     await handleSubmit();
     onClose();
     setSeatCount(1);
-  }
-
-
-  // Check if all VIP or Accessible seats are booked
-  const isZoneFullyBooked = (zoneName) => {
-    const zoneSeats = seats.filter(seat => seat.zone.toLowerCase() === zoneName.toLowerCase());
-    return zoneSeats.length > 0 && zoneSeats.every(seat => seat.status !== "available");
   };
 
+  // disable VIP/Accessible if fully booked
+  const isZoneFullyBooked = zoneName => {
+    const zoneSeats = seats.filter(
+      seat => seat.zone.toLowerCase() === zoneName.toLowerCase()
+    );
+    return zoneSeats.length > 0 && zoneSeats.every(s => s.status !== "available");
+  };
   const vipDisabled = isZoneFullyBooked("VIP");
-  const accessibleDisabled = isZoneFullyBooked("Accessible");
+  const accessibleDisabled = isZoneFullyBooked("accessible");
 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50">
@@ -42,7 +68,9 @@ const BookingFormModal = ({ onClose, passengerData, setPassengerData, handleSubm
         <h2 className="text-2xl font-bold text-sky-600 mb-4">Passenger Details</h2>
 
         <label className="block mb-4">
-          <span className="block text-sm font-medium text-gray-700">Number of Seats</span>
+          <span className="block text-sm font-medium text-gray-700">
+            Number of Seats
+          </span>
           <select
             value={seatCount}
             onChange={handleSeatCountChange}
@@ -59,50 +87,75 @@ const BookingFormModal = ({ onClose, passengerData, setPassengerData, handleSubm
         <div className="space-y-6">
           {passengerData.map((passenger, i) => (
             <div key={i} className="border border-gray-300 rounded-lg p-4">
-              <h3 className="font-semibold text-gray-700 mb-4">Passenger {i + 1}</h3>
+              <h3 className="font-semibold text-gray-700 mb-4">
+                Passenger {i + 1}
+              </h3>
               <div className="grid md:grid-cols-2 gap-4">
+                {/* Name */}
                 <div>
-                  <label className="block mb-1 text-sm font-medium text-gray-700">Full Name</label>
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    Full Name
+                  </label>
                   <input
                     type="text"
-                    placeholder="Full Name"
-                    className={`input input-bordered w-full ${errors[i]?.name ? "border-red-500" : ""}`}
+                    className="input input-bordered w-full"
                     value={passenger.name}
-                    onChange={(e) => handleInputChange(i, "name", e.target.value)}
+                    onChange={e =>
+                      handleInputChange(i, "name", e.target.value)
+                    }
                   />
                 </div>
 
+                {/* Passport */}
                 <div>
-                  <label className="block mb-1 text-sm font-medium text-gray-700">Passport Number</label>
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    Passport Number
+                  </label>
                   <input
                     type="text"
-                    placeholder="Passport Number"
-                    className={`input input-bordered w-full ${errors[i]?.passport ? "border-red-500" : ""}`}
+                    className="input input-bordered w-full"
                     value={passenger.passport}
-                    onChange={(e) => handleInputChange(i, "passport", e.target.value)}
+                    onChange={e =>
+                      handleInputChange(i, "passport", e.target.value)
+                    }
                   />
                 </div>
 
+                {/* DOB */}
                 <div>
-                  <label className="block mb-1 text-sm font-medium text-gray-700">Date of Birth</label>
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    Date of Birth
+                  </label>
                   <input
                     type="date"
-                    className={`input input-bordered w-full ${errors[i]?.dob ? "border-red-500" : ""}`}
+                    className="input input-bordered w-full"
                     value={passenger.dob}
-                    onChange={(e) => handleInputChange(i, "dob", e.target.value)}
+                    onChange={e =>
+                      handleInputChange(i, "dob", e.target.value)
+                    }
                   />
                 </div>
 
+                {/* Zone */}
                 <div>
-                  <label className="block mb-1 text-sm font-medium text-gray-700">Zone</label>
+                  <label className="block mb-1 text-sm font-medium text-gray-700">
+                    Zone
+                  </label>
                   <select
-                    className={`select select-bordered w-full ${errors[i]?.zone ? "border-red-500" : ""}`}
+                    className="select select-bordered w-full"
                     value={passenger.zone}
-                    onChange={(e) => handleInputChange(i, "zone", e.target.value)}
+                    onChange={e =>
+                      handleInputChange(i, "zone", e.target.value)
+                    }
                   >
                     <option value="standard">Standard</option>
-                    <option value="VIP" disabled={vipDisabled}>VIP {vipDisabled ? "(Fully Booked)" : ""}</option>
-                    <option value="accessible" disabled={accessibleDisabled}>Accessible {accessibleDisabled ? "(Fully Booked)" : ""}</option>
+                    <option value="VIP" disabled={vipDisabled}>
+                      VIP {vipDisabled ? "(Fully Booked)" : ""}
+                    </option>
+                    <option value="accessible" disabled={accessibleDisabled}>
+                      Accessible{" "}
+                      {accessibleDisabled ? "(Fully Booked)" : ""}
+                    </option>
                   </select>
                 </div>
               </div>
@@ -119,7 +172,7 @@ const BookingFormModal = ({ onClose, passengerData, setPassengerData, handleSubm
           </button>
           <button
             className="btn bg-sky-500 text-white border-none hover:bg-sky-600"
-            onClick={handleSubmitFunctions}
+            onClick={validateAndSubmit}
           >
             Confirm Booking
           </button>

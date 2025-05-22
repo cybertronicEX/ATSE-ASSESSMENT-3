@@ -131,3 +131,53 @@ exports.deleteFlight = async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 };
+
+
+exports.markBrokenSeats = async (req, res) => {
+  const flightId = req.params.id;
+  const { seatCount } = req.body;
+
+  if (typeof seatCount !== 'number' || seatCount < 1) {
+    return res.status(400).json({ error: "seatCount must be a positive integer." });
+  }
+
+  try {
+    const flightRef = db.collection("flights").doc(flightId);
+    const snap = await flightRef.get();
+    if (!snap.exists) {
+      return res.status(404).json({ error: "Flight not found." });
+    }
+
+    const data = snap.data();
+    const allSeats = Array.isArray(data.seats) ? [...data.seats] : [];
+    const available = allSeats.filter(s => s.status === "available");
+
+    if (available.length < seatCount) {
+      return res
+        .status(400)
+        .json({ error: `Only ${available.length} available seats; cannot break ${seatCount}.` });
+    }
+
+    // randomly pick seatCount seats
+    // simple shuffle + slice:
+    const shuffled = available.sort(() => Math.random() - 0.5);
+    const toBreak = shuffled.slice(0, seatCount);
+
+    // mark them broken
+    const brokenSeats = toBreak.map(seat => {
+      const idx = allSeats.findIndex(
+        s => s.row === seat.row && s.column === seat.column
+      );
+      allSeats[idx] = { ...allSeats[idx], status: "broken" };
+      return { row: seat.row, column: seat.column };
+    });
+
+    // persist update
+    await flightRef.update({ seats: allSeats });
+
+    return res.status(200).json({ brokenSeats });
+  } catch (err) {
+    console.error("markBrokenSeats error:", err);
+    return res.status(500).json({ error: err.message });
+  }
+};

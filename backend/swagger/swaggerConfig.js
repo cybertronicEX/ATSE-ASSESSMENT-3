@@ -5,9 +5,9 @@ const options = {
     definition: {
         openapi: "3.0.0",
         info: {
-            title: "PM Tool API",
+            title: "ATSE Assessment 3 API",
             version: "1.0.0",
-            description: "Documentation for PM Tool backend",
+            description: "Documentation for ATSE Assessment 3 backend",
         },
 
         components: {

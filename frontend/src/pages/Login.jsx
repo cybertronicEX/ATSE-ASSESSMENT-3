@@ -97,7 +97,7 @@ function Login() {
       const idToken = await auth.currentUser.getIdToken(true);
 
       // Store the token in your context/localStorage
-      login(idToken, res.data.role); // ✅ Make sure `res.data.role` exists and is passed
+      login(idToken, res.data.role, res.data.userId); // ✅ Make sure `res.data.role` exists and is passed
       const userRole = (res.data.role || "user").toLowerCase();
 
       console.log(userRole);
@@ -140,8 +140,8 @@ function Login() {
           </h1>
           <p className="py-4 sm:py-6 text-base sm:text-lg">
             {isSignUp
-              ? "Manage your projects with AI-powered tools. Sign up to create project charters, collaborate with your team, and track progress efficiently."
-              : "Log in to access your personalized dashboard, manage projects, and collaborate seamlessly with your team."}
+              ? "Book your flights effortlessly. Sign up to find flights and book tickets efficiently."
+              : "Log in to access your personalized dashboard."}
           </p>
         </div>
 
@@ -164,9 +164,7 @@ function Login() {
               <h1 className={`text-2xl sm:text-3xl font-bold mt-3 text-center ${cardHeadingClass}`}>
                 Welcome
               </h1>
-              <p className={`text-center p-5 text-sm sm:text-base ${cardParagraphClass}`}>
-                This is an all-in-one doc that brings words, data, and teams together. Sign up for free.
-              </p>
+
 
               <div className="card-body">
                 <fieldset className="fieldset">
@@ -230,9 +228,7 @@ function Login() {
               <h1 className={`text-2xl sm:text-3xl font-bold mt-3 text-center ${cardHeadingClass}`}>
                 Welcome Back
               </h1>
-              <p className={`text-center p-5 text-sm sm:text-base ${cardParagraphClass}`}>
-                Enter your credentials to continue managing your projects effortlessly.
-              </p>
+             
 
               <div className="card-body">
                 <fieldset className="fieldset">
